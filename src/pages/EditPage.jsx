@@ -1,20 +1,13 @@
 import { useState } from 'react';
 import './EditPage.css';
-import axios from 'axios';
+import axiosInstance from '../apis/axiosInstance';
 import { useNavigate } from 'react-router';
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
 
-export default function EditPage({ getPost }) {
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [author, setAuthor] = useState('');
-    const { id } = useParams();
-    const navigate = useNavigate();
-
-    async function getDetailPost() {
+    async function getDetailPost(id, setTitle, setDescription, setAuthor) {
         try {
-            const response = await axios.get('https://fe-server-production.up.railway.app/posts/' + id, {
+            const response = await axiosInstance.get('/posts/' + id, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
                 },
@@ -27,19 +20,24 @@ export default function EditPage({ getPost }) {
             console.log(error);
         }
     }
-
-    useEffect(() => {
-        getDetailPost();
-    }, []);
+export default function EditPage({ getPost }) {
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [author, setAuthor] = useState('');
+    const { id } = useParams();
+    const navigate = useNavigate();
 
     async function handleSubmit(e) {
         e.preventDefault();
-
         try {
-            const response = await axios.put('https://fe-server-production.up.railway.app/posts/' + id, {
+            const response = await axiosInstance.put('/posts/' + id, {
                 title,
                 description,
                 author,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+                },
             });
             console.log(response.data);
             window.alert('글이 수정되었습니다.');
@@ -50,14 +48,21 @@ export default function EditPage({ getPost }) {
         }
     }
 
+
+
+    useEffect(() => {
+        
+        getDetailPost(id, setTitle, setDescription, setAuthor);
+    }, [id]);
+
+
+
     return (
         <div className="post-form-container">
             <h2 className="post-form-title">글 쓰기</h2>
             <form
                 className="post-form"
-                onSubmit={(e) => {
-                    handleSubmit(e);
-                }}
+                onSubmit={handleSubmit}
             >
                 <div className="form-group">
                     <label htmlFor="title">제목 *</label>

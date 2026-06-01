@@ -12,10 +12,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import axiosInstance from './apis/axiosInstance';
 
-function App() {
-    const [posts, setPosts] = useState([]);
-
-    async function getPost() {
+ async function getPost(setPosts) {
         try {
             const response = await axiosInstance.get('/posts');
             console.log(response.data);
@@ -25,8 +22,13 @@ function App() {
         }
     }
 
+function App() {
+    const [posts, setPosts] = useState([]);
+
+   
+
     useEffect(() => {
-        getPost();
+        getPost(setPosts);
     }, []);
 
     return (

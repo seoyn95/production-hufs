@@ -4,37 +4,45 @@ import { useState, useEffect } from 'react';
 import './DetailPage.css';
 import axios from 'axios';
 
-export default function DetailPage({ getPost }) {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const [post, setPost] = useState(null);
-
-    async function getDetailPost() {
+    async function getDetailPost(id, setPost, navigate) {
         try {
             const response = await axios.get('https://fe-server-production.up.railway.app/posts/' + id, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
                 },
             });
+
             setPost(response.data);
         } catch (error) {
             console.log(error);
+            navigate('/');
         }
     }
 
-    useEffect(() => {
-        getDetailPost();
-    }, [id]);
-
-    async function deletePost() {
+    async function deletePost(id, navigate, getPost) {
         try {
             const response = await axios.delete('https://fe-server-production.up.railway.app/posts/' + id);
             console.log(response.data);
             window.alert('글이 삭제되었습니다.');
             await getPost();
             navigate('/');
-        } catch (error) {}
+        } catch (error) {   
+            console.log(error);
+        }
     }
+
+export default function DetailPage({ getPost }) {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [post, setPost] = useState(null);
+
+
+
+    useEffect(() => {
+        getDetailPost(id, setPost, navigate);
+    }, [navigate, id]);
+
+
 
     if (!post) {
         return <div className="detail-loading">로딩 중...</div>;
@@ -52,7 +60,7 @@ export default function DetailPage({ getPost }) {
             <hr className="detail-divider" />
             <p className="detail-description">{post.description}</p>
             <button onClick={() => navigate('/edit/' + id)}>수정</button>
-            <button onClick={deletePost}>삭제 🗑️</button>
+            <button onClick={() => deletePost(id, navigate, getPost)}>삭제 🗑️</button>
         </div>
     );
 }
